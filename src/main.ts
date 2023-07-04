@@ -1,9 +1,6 @@
 import { PlaywrightCrawler, downloadListOfUrls , Dataset} from 'crawlee';
 import { DOMParser } from 'xmldom';
 
-// import  { XMLparseURLs } from './links/getLinks';
-// import { urls } from './config';
-
 type Data = {
     title: string
     prices: { quantity: string; price: string }[];
@@ -44,7 +41,7 @@ const crawler = new PlaywrightCrawler({
         try {
             await page.waitForSelector('tr.woocommerce-product-attributes-item--attribute_mengepalette td.woocommerce-product-attributes-item__value p', { timeout: 1 });
             const pcsPalette = await page.$eval('tr.woocommerce-product-attributes-item--attribute_mengepalette td.woocommerce-product-attributes-item__value p', (el) => el.textContent?.trim() ?? '');
-            console.log(pcsPalette);
+            log.info(`pcsPalette is ${pcsPalette}`);
             data.push({ title, prices, sku, pcsPalette, url: page.url() });
           } catch (error) {
             log.warning(`Warning: ${error}`);
@@ -57,28 +54,28 @@ const crawler = new PlaywrightCrawler({
 const url =  "https://ecoon.de/product-sitemap.xml" //urls[0];
 const listOfUrls = await downloadListOfUrls({ url: url });
 
-// remove all urls which are not include ecoon.de
 const newListOfUrls = listOfUrls.filter((url) => {
     return url.includes('ecoon.de/produkt')
 });
 console.log(newListOfUrls);
 
-// top 10 urls
-const top10Urls = newListOfUrls.slice(0, 10);
+// // top 10 urls
+// const top10Urls = newListOfUrls.slice(0, 10);
 
-// await crawler.run(['https://ecoon.de/produkt/graspapierkarton-550-x-300-x-550-350-300-mm-2-wellig/']);
-// await crawler.run(['https://ecoon.de/produkt/safepac-soft-polstermatten-380-x-380-mm/']);
-await crawler.run(top10Urls);
+const start = Date.now();
+await crawler.run(newListOfUrls);
 
+await Dataset.pushData(data);
 
 for (const item of data) {
     console.log(item);
 }
 
-await Dataset.pushData(data);
+// console.log(`Time: ${Date.now() - start}ms`);
+// time in minutes and seconds
+const time = (Date.now() - start) / 1000 / 60;
+console.log(`Time: ${time.toFixed(2)} minutes`);
 
-
-// import { PlaywrightCrawler } from 'crawlee';
 
 type SitemapIndex = {
     Locations: string[];
@@ -88,28 +85,3 @@ type SitemapIndex = {
     Locations: string[];
   };
   
-  // function getLinks(url: string): Promise<string[]> {
-  //   // if the url is xml, parse it
-  //   if (url.includes('.xml')) {
-  //     return XMLparseURLs(url);
-  //   }
-  
-  //   const domain = getDomain(url);
-  //   const links: string[] = [];
-  
-  //   const crawler = new PlaywrightCrawler();
-  //   crawler.on('link', (link) => {
-  //     // the link must be a link without a domain and contain 'x'
-  //     if (link.includes('x') && !link.includes('http')) {
-  //       const fullPathURL = domain + link;
-  //       links.push(fullPathURL);
-  //     }
-  //   });
-  
-  //   return crawler.crawl(url).then(() => links);
-  // }
-  
-//   function getDomain(url: string): string {
-//     const splitted = url.split('/');
-//     return `${splitted[0]}//${splitted[2]}/`;
-//   }
