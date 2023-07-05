@@ -1,11 +1,11 @@
 import { PlaywrightCrawler, downloadListOfUrls , Dataset} from 'crawlee';
-import { DOMParser } from 'xmldom';
+import { TimeSerie } from './saveTimeSerie.js';
 
-type Data = {
+export type Data = {
     title: string
-    prices: { quantity: string; price: string }[];
+    prices: { quantity: number; price: number }[];
     sku: string;
-    pcsPalette: string;
+    pcsPalette: number;
     url: string;
 }
 
@@ -27,8 +27,11 @@ const crawler = new PlaywrightCrawler({
         // await page.waitForSelector('div#bulk-price-table table tbody tr');
         const prices = await page.$$eval('div#bulk-price-table table tbody tr', (els) => {
             return els.map((el) => {
-                const quantity = el.querySelector('td:nth-child(1)')?.textContent?.trim() ?? '';
-                const price = el.querySelector('div.td-2 span + div span')?.textContent?.trim() ?? '';
+                const quantity_string = el.querySelector('td:nth-child(1)')?.textContent?.trim() ?? '';
+                const quantity = parseInt(quantity_string);
+                const price_string = el.querySelector('div.td-2 span + div span')?.textContent?.trim() ?? '';
+                // remove all non-numeric characters and replace comma with dot and parse to float
+                const price = parseFloat(price_string.replace(/[^0-9,]/g, '').replace(',', '.'));
                 return { quantity, price: price };
             });
         });
@@ -39,13 +42,19 @@ const crawler = new PlaywrightCrawler({
         log.info(`SKU is ${sku}`);
         
         try {
-            await page.waitForSelector('tr.woocommerce-product-attributes-item--attribute_mengepalette td.woocommerce-product-attributes-item__value p', { timeout: 1 });
-            const pcsPalette = await page.$eval('tr.woocommerce-product-attributes-item--attribute_mengepalette td.woocommerce-product-attributes-item__value p', (el) => el.textContent?.trim() ?? '');
+            const table = await page.$('table.shop_attributes');
+            const tableText = await table?.textContent();
+            const pcsPalette_string = tableText?.match(/Palette\s*\d+/g)?.[0] ?? '';
+            const pcsPalette = +pcsPalette_string.replace(/[^0-9]/g, '');
             log.info(`pcsPalette is ${pcsPalette}`);
-            data.push({ title, prices, sku, pcsPalette, url: page.url() });
+            const tempData = { title, prices, sku, pcsPalette, url: page.url() };
+            data.push(tempData);
+            TimeSerie.save(data);
           } catch (error) {
             log.warning(`Warning: ${error}`);
-            data.push({ title, prices, sku, pcsPalette: '', url: page.url() });
+            const tempData = { title, prices, sku, pcsPalette: 0, url: page.url() };
+            data.push(tempData);
+            TimeSerie.save(data);
           }
 
     },
@@ -59,29 +68,22 @@ const newListOfUrls = listOfUrls.filter((url) => {
 });
 console.log(newListOfUrls);
 
-// // top 10 urls
-// const top10Urls = newListOfUrls.slice(0, 10);
+// top 10 urls
+const top10Urls = newListOfUrls.slice(0, 10);
 
 const start = Date.now();
-await crawler.run(newListOfUrls);
+await crawler.run(top10Urls);
 
 await Dataset.pushData(data);
+
 
 for (const item of data) {
     console.log(item);
 }
 
+
+
 // console.log(`Time: ${Date.now() - start}ms`);
 // time in minutes and seconds
 const time = (Date.now() - start) / 1000 / 60;
 console.log(`Time: ${time.toFixed(2)} minutes`);
-
-
-type SitemapIndex = {
-    Locations: string[];
-  };
-  
-  type Sitemap = {
-    Locations: string[];
-  };
-  
