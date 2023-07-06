@@ -69,8 +69,7 @@ const newListOfUrls = listOfUrls.filter((url) => {
 });
 console.log(newListOfUrls);
 
-// const top10Urls = newListOfUrls.slice(0, 10);
-
+// await crawler.run(newListOfUrls.slice(0, 10));
 await crawler.run(newListOfUrls);
 
 for (const item of data) {
