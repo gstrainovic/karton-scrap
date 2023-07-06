@@ -27,7 +27,6 @@ export class TimeSerie {
                 
                 point.floatField('price', price.price);
                 point.intField('quantity', price.quantity);
-                // point.timestamp(new Date());
                 writeAPI.writePoint(point)
             }
             
