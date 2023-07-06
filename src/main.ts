@@ -49,12 +49,12 @@ const crawler = new PlaywrightCrawler({
             log.info(`pcsPalette is ${pcsPalette}`);
             const tempData = { title, prices, sku, pcsPalette, url: page.url() };
             data.push(tempData);
-            TimeSerie.save(data);
+            TimeSerie.save(tempData);
           } catch (error) {
             log.warning(`Warning: ${error}`);
             const tempData = { title, prices, sku, pcsPalette: 0, url: page.url() };
             data.push(tempData);
-            TimeSerie.save(data);
+            TimeSerie.save(tempData);
           }
 
     },
