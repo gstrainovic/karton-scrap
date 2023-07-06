@@ -1,11 +1,7 @@
 export default class Config {
-    static urls = [
-        "https://ecoon.de/product-sitemap.xml/",
-        "https://www.karton.eu/Unsere-Kartonagen/",
-    ]
-
     static Exportieren = {
-        Alle : false,
+        Alle : true,
+        Letzte: true,
         Teil : true
     }
     
