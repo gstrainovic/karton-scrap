@@ -12,12 +12,12 @@ export default async function scrapeKartonEu() {
     const links = await getLinks(url, domain)
 
     // print the links
-    console.log('Links:, ', links);
+    // console.log('Links:, ', links);
 
-    const data = [] as Data[];
+    // const data = [] as Data[];
 
     const crawler = new PlaywrightCrawler({
-        requestHandler: async ({ page , log }) => {
+        requestHandler: async ({ page }) => {
     
             await page.waitForSelector('h1');
             const titleAr = await page.$$eval('h1', (els) => {
@@ -27,10 +27,10 @@ export default async function scrapeKartonEu() {
                 );
             });
             const title = titleAr[0] ?? '';
-            log.info(`Title is ${title}`);
+            // log.info(`Title is ${title}`);
     
             const sku = await page.$eval('p.product-sku span', (el) => el.textContent) ?? '';
-            log.info(`SKU is ${sku}`);
+            // log.info(`SKU is ${sku}`);
 
             const prices = await page.$$eval('.bulk-price tbody tr', (rows) => {
                 return rows.map((row) => {
@@ -39,34 +39,37 @@ export default async function scrapeKartonEu() {
                   return { quantity: quantity, price: priceExclVat };
                 });
               });
-            log.info('prices:', prices);
+            // log.info('prices:', prices);
 
             try {
                 const pcsPaletteStr = await page.$eval('#cUNNummer', (el) => el.textContent?.match(/\d+/)?.join('')) ?? '0';
                 const pcsPalette = parseInt(pcsPaletteStr);
-                log.info(`pcsPalette is ${pcsPalette}`);
+                // log.info(`pcsPalette is ${pcsPalette}`);
                 const tempData = { title, prices, sku, pcsPalette, url: page.url() };
-                data.push(tempData);
+                // data.push(tempData);
                 await TimeSerie.save(tempData);
-                await Dataset.pushData(tempData);                
+                // await Dataset.pushData(tempData);                
             } catch (error) {
-                log.warning(`Warning: ${error}`);
+                // log.warning(`Warning: ${error}`);
                 const tempData = { title, prices, sku, pcsPalette: 0, url: page.url() };
-                data.push(tempData);
+                // data.push(tempData);
                 await TimeSerie.save(tempData);
-                await Dataset.pushData(tempData);  
+                // await Dataset.pushData(tempData);  
             }
 
         },
     });
     
+    // console.log(newListOfUrls);
+    console.log('number of urls to scrape: ' + links.length);
+
     // await crawler.run(['https://www.karton.eu/320x290x35-80-mm-Box-For-Lever-Arch-Files-A4']);
-    await crawler.run(links.slice(0, 10));
-    // await crawler.run(links);
+    // await crawler.run(links.slice(0, 10));
+    await crawler.run(links);
     
-    for (const item of data) {
-        console.log(item);
-    }
+    // for (const item of data) {
+    //     console.log(item);
+    // }
     
     const time = (Date.now() - start) / 1000 / 60;
     console.log(`scrap ecoon finished after ${time.toFixed(2)} minutes`);

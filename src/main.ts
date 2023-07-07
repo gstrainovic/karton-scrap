@@ -9,5 +9,5 @@ export type Data = {
     url: string;
 }
 
-scrapeKartonEu();
-scrapeEcoon();
+await scrapeKartonEu();
+await scrapeEcoon();

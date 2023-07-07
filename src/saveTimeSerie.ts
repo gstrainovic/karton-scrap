@@ -33,7 +33,7 @@ export class TimeSerie {
             
         try {
             await writeAPI.close()
-            console.log('saved' + item.sku + ' to influxdb')
+            // console.log('saved' + item.sku + ' to influxdb')
         } catch (e) {
             console.error(e)
         }
