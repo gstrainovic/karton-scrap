@@ -1,3 +1,4 @@
+import exportAll from './export.js';
 import scrapeEcoon from './scraper/ecoon.js';
 import scrapeKartonEu from './scraper/karton-eu.js';
 
@@ -9,5 +10,6 @@ export type Data = {
     url: string;
 }
 
-await scrapeKartonEu();
-await scrapeEcoon();
+await exportAll();
+// await scrapeKartonEu();
+// await scrapeEcoon();
