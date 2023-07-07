@@ -32,40 +32,35 @@ export default async function scrapeKartonEu() {
             const sku = await page.$eval('p.product-sku span', (el) => el.textContent) ?? '';
             log.info(`SKU is ${sku}`);
 
-            const prices = await page.$$eval('p#bulk-price-table table tbody tr', (els) => {
-                return els.map((el) => {
-                    const quantity_string = el.querySelector('td:nth-child(1)')?.textContent?.trim() ?? '';
-                    const quantity = parseInt(quantity_string);
-                    const price_string = el.querySelector('div.td-2 span + div span')?.textContent?.trim() ?? '';
-                    const price = parseFloat(price_string.replace(/[^0-9,]/g, '').replace(',', '.'));
-                    return { quantity, price: price };
+            const prices = await page.$$eval('.bulk-price tbody tr', (rows) => {
+                return rows.map((row) => {
+                  const quantity = parseInt(row.querySelector('td:first-child')?.textContent ?? '0');
+                  const priceExclVat = parseFloat(row.querySelector('td:nth-child(3)')?.textContent?.replace(',', '.') ?? '0');
+                  return { quantity: quantity, price: priceExclVat };
                 });
-            });
-            log.info("Prices:", prices);
-    
-            
+              });
+            log.info('prices:', prices);
+
             try {
-                const table = await page.$('table.shop_attributes');
-                const tableText = await table?.textContent();
-                const pcsPalette_string = tableText?.match(/Palette\s*\d+/g)?.[0] ?? '';
-                const pcsPalette = +pcsPalette_string.replace(/[^0-9]/g, '');
+                const pcsPaletteStr = await page.$eval('#cUNNummer', (el) => el.textContent?.match(/\d+/)?.join('')) ?? '0';
+                const pcsPalette = parseInt(pcsPaletteStr);
                 log.info(`pcsPalette is ${pcsPalette}`);
                 const tempData = { title, prices, sku, pcsPalette, url: page.url() };
                 data.push(tempData);
                 await TimeSerie.save(tempData);
-                await Dataset.pushData(tempData);
-              } catch (error) {
+                await Dataset.pushData(tempData);                
+            } catch (error) {
                 log.warning(`Warning: ${error}`);
                 const tempData = { title, prices, sku, pcsPalette: 0, url: page.url() };
                 data.push(tempData);
                 await TimeSerie.save(tempData);
-                await Dataset.pushData(tempData);
-              }
-    
+                await Dataset.pushData(tempData);  
+            }
+
         },
     });
     
-    
+    // await crawler.run(['https://www.karton.eu/320x290x35-80-mm-Box-For-Lever-Arch-Files-A4']);
     await crawler.run(links.slice(0, 10));
     // await crawler.run(links);
     

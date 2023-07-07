@@ -23,8 +23,9 @@ export class TimeSerie {
                 
                 point.tag('sku', item.sku);
                 point.tag('title', item.title);
+                point.tag('url', item.url);
+
                 point.intField('pcsPalette', item.pcsPalette);
-                
                 point.floatField('price', price.price);
                 point.intField('quantity', price.quantity);
                 writeAPI.writePoint(point)
