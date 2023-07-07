@@ -1,8 +1,9 @@
 - install influxdata
+- insall nodejs
 - run influxdb
 - create bucket
-- save the token to secrets.toml
-- start build/run.sh
+- save the token to src/secrets.ts
+- npm run start:dev
 
 # show all scraps
 from(bucket: "scrap")

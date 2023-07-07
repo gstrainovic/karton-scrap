@@ -1,4 +1,5 @@
 import Config from './config.js';
+import { ExportRecord } from './main.js';
 import Secrets from './secrets.js';
 import { InfluxDB } from '@influxdata/influxdb-client';
 import ExcelJS from 'exceljs';
@@ -29,31 +30,16 @@ export default async function exportAll() {
       // Add headers to the worksheet
       worksheet.addRow(['Datum', 'Artikelnummer', 'Anzahl', 'Preis', 'Stück pro Palette', 'Titel', 'Link']);
     
-      type Record = {
-        result: string,
-        table: number,
-        _start: string,
-        _stop: string,
-        _time: string,
-        _measurement: string,
-        sku: string,
-        title: string,
-        url: string,
-        pcsPalette: number,
-        price: number,
-        quantity: number
-      }
-    
       // Add data to the worksheet
       for await (const record of result) {
         const row: any[] = [
-          new Date((record as Record)._time).toISOString(),
-          (record as Record).sku,
-          (record as Record).quantity,
-          (record as Record).price,
-          (record as Record).pcsPalette,
-          (record as Record).title,
-          (record as Record).url
+          new Date((record as ExportRecord)._time).toISOString(),
+          (record as ExportRecord).sku,
+          (record as ExportRecord).quantity,
+          (record as ExportRecord).price,
+          (record as ExportRecord).pcsPalette,
+          (record as ExportRecord).title,
+          (record as ExportRecord).url
         ];
         worksheet.addRow(row);
       }

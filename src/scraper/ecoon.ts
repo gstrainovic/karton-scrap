@@ -1,11 +1,10 @@
 import { PlaywrightCrawler, downloadListOfUrls , Dataset} from 'crawlee';
-import { TimeSerie } from '../saveTimeSerie.js';
+import { TimeSerie } from '../save-time-serie.js';
 import { Data } from '../main.js';
 
 export default async function scrapeEcoon() {
     console.log('start scraping ecoon on ' + new Date().toISOString());
     const start = Date.now();
-    // const data = [] as Data[];
     
     const crawler = new PlaywrightCrawler({
         requestHandler: async ({ page }) => {
@@ -18,7 +17,6 @@ export default async function scrapeEcoon() {
                 );
             });
             const title = titleAr[0] ?? '';
-            // log.info(`Title is ${title}`);
     
             const prices = await page.$$eval('div#bulk-price-table table tbody tr', (els) => {
                 return els.map((el) => {
@@ -26,30 +24,22 @@ export default async function scrapeEcoon() {
                     const quantity = parseInt(quantity_string);
                     const price_string = el.querySelector('div.td-2 span + div span')?.textContent?.trim() ?? '';
                     const price = parseFloat(price_string.replace(/[^0-9,]/g, '').replace(',', '.'));
-                    return { quantity, price: price };
+                    return { quantity, price: price + 0.2 };
                 });
             });
-            // log.info("Prices:", prices);
     
             const sku = await page.$eval('span.sku_wrapper span.sku', (el) => el.textContent) ?? '';
-            // log.info(`SKU is ${sku}`);
             
             try {
                 const table = await page.$('table.shop_attributes');
                 const tableText = await table?.textContent();
                 const pcsPalette_string = tableText?.match(/Palette\s*\d+/g)?.[0] ?? '';
                 const pcsPalette = +pcsPalette_string.replace(/[^0-9]/g, '');
-                // log.info(`pcsPalette is ${pcsPalette}`);
-                const tempData = { title, prices, sku, pcsPalette, url: page.url() };
-                // data.push(tempData);
+                const tempData : Data = { title, prices, sku, pcsPalette, url: page.url() };
                 await TimeSerie.save(tempData);
-                // await Dataset.pushData(tempData);
               } catch (error) {
-                // log.warning(`Warning: ${error}`);
-                const tempData = { title, prices, sku, pcsPalette: 0, url: page.url() };
-                // data.push(tempData);
+                const tempData : Data = { title, prices, sku, pcsPalette: 0, url: page.url() };
                 await TimeSerie.save(tempData);
-                // await Dataset.pushData(tempData);
               }
     
         },
@@ -61,15 +51,10 @@ export default async function scrapeEcoon() {
     const newListOfUrls = listOfUrls.filter((url) => {
         return url.includes('ecoon.de/produkt')
     });
-    // console.log(newListOfUrls);
     console.log('number of urls to scrape: ' + newListOfUrls.length);
     
-    // await crawler.run(newListOfUrls.slice(0, 10));
-    await crawler.run(newListOfUrls);
-    
-    // for (const item of data) {
-    //     console.log(item);
-    // }
+    await crawler.run(newListOfUrls.slice(0, 10));
+    // await crawler.run(newListOfUrls);
     
     const time = (Date.now() - start) / 1000 / 60;
     console.log(`scrap ecoon finished after ${time.toFixed(2)} minutes`);
