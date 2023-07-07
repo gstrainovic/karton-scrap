@@ -1,5 +1,5 @@
 import Config from './config.js';
-import { ExportRecord } from './main.js';
+import { ExportRecord, Measurements } from './main.js';
 import Secrets from './secrets.js';
 import { InfluxDB } from '@influxdata/influxdb-client';
 import ExcelJS from 'exceljs';
@@ -12,14 +12,18 @@ export default async function exportDiffs() {
   });
   const queryAPI = client.getQueryApi(Config.Influx.Org);
 
-  // get a list of measurements in the bucket
-  const measurements : string[] = ['ecoon.de', 'www.karton.eu'];
+  const measurements : string[] = Measurements;
 
   measurements.forEach(async measurement => {
+
       const query = `from(bucket: "${Config.Influx.Bucket}")
-        |> range(start: -300m)
-        |> filter(fn: (r) => r["_measurement"] == "${measurement}")
-        |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")`;
+      |> range(start: -365d)
+      |> filter(fn: (r) => r["_measurement"] == "${measurement}")
+      |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
+      |> group(columns: ["sku", "quantity"])
+      |> difference(columns: ["price"])
+      |> filter(fn: (r) => r.price > 0)`
+
     
       const result = await queryAPI.collectRows(query);
     
@@ -28,7 +32,7 @@ export default async function exportDiffs() {
       const worksheet = workbook.addWorksheet('Sheet1');
     
       // Add headers to the worksheet
-      worksheet.addRow(['Datum', 'Artikelnummer', 'Anzahl', 'Preis', 'Stück pro Palette', 'Titel', 'Link']);
+      worksheet.addRow(['Datum', 'Artikelnummer', 'Anzahl', 'Preisunterschied', 'Stück pro Palette', 'Titel', 'Link']);
     
       // Add data to the worksheet
       for await (const record of result) {
@@ -45,7 +49,7 @@ export default async function exportDiffs() {
       }
     
       // Save the Excel file named with date, time (minutes and seconds)
-      const filename = `./data/export-alle-${measurement}-${new Date().toISOString().slice(0, 16).replace(/:/g, "-")}.xlsx`;
+      const filename = `./data/export-diffs-${measurement}-${new Date().toISOString().slice(0, 16).replace(/:/g, "-")}.xlsx`;
       await workbook.xlsx.writeFile(filename);
   });
 

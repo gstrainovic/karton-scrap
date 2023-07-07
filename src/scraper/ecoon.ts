@@ -53,8 +53,8 @@ export default async function scrapeEcoon() {
     });
     console.log('number of urls to scrape: ' + newListOfUrls.length);
     
-    await crawler.run(newListOfUrls.slice(0, 10));
-    // await crawler.run(newListOfUrls);
+    // await crawler.run(newListOfUrls.slice(0, 10));
+    await crawler.run(newListOfUrls);
     
     const time = (Date.now() - start) / 1000 / 60;
     console.log(`scrap ecoon finished after ${time.toFixed(2)} minutes`);

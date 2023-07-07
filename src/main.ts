@@ -1,4 +1,5 @@
 import exportAll from './export-all.js';
+import exportDiffs from './export-diffs.js';
 import scrapeEcoon from './scraper/ecoon.js';
 import scrapeKartonEu from './scraper/karton-eu.js';
 
@@ -25,6 +26,9 @@ export type ExportRecord = {
     quantity: number
 }
 
+export const Measurements = ['ecoon.de', 'www.karton.eu']
+
 await scrapeKartonEu();
 await scrapeEcoon();
 await exportAll();
+await exportDiffs();

@@ -1,5 +1,5 @@
 import Config from './config.js';
-import { ExportRecord } from './main.js';
+import { ExportRecord, Measurements } from './main.js';
 import Secrets from './secrets.js';
 import { InfluxDB } from '@influxdata/influxdb-client';
 import ExcelJS from 'exceljs';
@@ -12,8 +12,7 @@ export default async function exportAll() {
   });
   const queryAPI = client.getQueryApi(Config.Influx.Org);
 
-  // get a list of measurements in the bucket
-  const measurements : string[] = ['ecoon.de', 'www.karton.eu'];
+  const measurements : string[] = Measurements;
 
   measurements.forEach(async measurement => {
       const query = `from(bucket: "${Config.Influx.Bucket}")

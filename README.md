@@ -24,7 +24,7 @@ from(bucket: "scrap")
 |> pivot(rowKey:["_time"], columnKey: ["_field"], valueColumn: "_value")
 |> group(columns: ["sku", "quantity"])
 |> difference(columns: ["price"])
-|> filter(fn: (r) => r.preis > 0)
+|> filter(fn: (r) => r.price > 0)
 
 
     
