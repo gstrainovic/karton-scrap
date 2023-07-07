@@ -24,7 +24,7 @@ export default async function scrapeEcoon() {
                     const quantity = parseInt(quantity_string);
                     const price_string = el.querySelector('div.td-2 span + div span')?.textContent?.trim() ?? '';
                     const price = parseFloat(price_string.replace(/[^0-9,]/g, '').replace(',', '.'));
-                    return { quantity, price: price + 0.2 };
+                    return { quantity, price: price };
                 });
             });
     
