@@ -1,34 +1,16 @@
-import exportAll from './export-all.js';
-import exportDiffs from './export-diffs.js';
-import scrapeEcoon from './scraper/ecoon.js';
-import scrapeKartonEu from './scraper/karton-eu.js';
+import { ExportAll, ExportDiff } from './export.js';
+import EcoonScraper from './scraper/ecoon.js';
+import KartonEuScraper from './scraper/karton-eu.js';
 
-export type Data = {
-    title: string
-    prices: { quantity: number; price: number }[];
-    sku: string;
-    pcsPalette: number;
-    url: string;
-}
+const kartonEuScraper = new KartonEuScraper();
+await kartonEuScraper.scrape();
 
-export type ExportRecord = {
-    result: string,
-    table: number,
-    _start: string,
-    _stop: string,
-    _time: string,
-    _measurement: string,
-    sku: string,
-    title: string,
-    url: string,
-    pcsPalette: number,
-    price: number,
-    quantity: number
-}
+const ecoonScraper = new EcoonScraper();
+await ecoonScraper.scrape();
 
-export const Measurements = ['ecoon.de', 'www.karton.eu']
+const exportAll = new ExportAll();
+await exportAll.export();
 
-await scrapeKartonEu();
-await scrapeEcoon();
-await exportAll();
-await exportDiffs();
+const exportDiff = new ExportDiff();
+await exportDiff.export();
+

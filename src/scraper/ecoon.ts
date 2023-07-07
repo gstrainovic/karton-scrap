@@ -1,14 +1,10 @@
 import { PlaywrightCrawler, downloadListOfUrls , Dataset} from 'crawlee';
 import { TimeSerie } from '../save-time-serie.js';
-import { Data } from '../main.js';
+import { Data, Scraper } from './scraper.js';
 
-export default async function scrapeEcoon() {
-    console.log('start scraping ecoon on ' + new Date().toISOString());
-    const start = Date.now();
-    
-    const crawler = new PlaywrightCrawler({
+export default class EcoonScraper extends Scraper {
+    override crawler = new PlaywrightCrawler({
         requestHandler: async ({ page }) => {
-    
             await page.waitForSelector('h2.product_title.entry-title');
             const titleAr = await page.$$eval('h2.product_title.entry-title', (els) => {
                 return els.map((el) => {
@@ -45,19 +41,18 @@ export default async function scrapeEcoon() {
         },
     });
     
-    const url =  "https://ecoon.de/product-sitemap.xml"
-    const listOfUrls = await downloadListOfUrls({ url: url });
-    
-    const newListOfUrls = listOfUrls.filter((url) => {
-        return url.includes('ecoon.de/produkt')
-    });
-    console.log('number of urls to scrape: ' + newListOfUrls.length);
-    
-    // await crawler.run(newListOfUrls.slice(0, 10));
-    await crawler.run(newListOfUrls);
-    
-    const time = (Date.now() - start) / 1000 / 60;
-    console.log(`scrap ecoon finished after ${time.toFixed(2)} minutes`);
+    protected override async getLinks() {
+        const url =  "https://ecoon.de/product-sitemap.xml"
+        const listOfUrls = await downloadListOfUrls({ url: url });
+        
+        const newListOfUrls = listOfUrls.filter((url) => {
+            return url.includes('ecoon.de/produkt')
+        });
+        return newListOfUrls;
+    }
+
 }
+
+
 
 
