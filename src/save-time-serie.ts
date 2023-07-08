@@ -1,7 +1,14 @@
 import { InfluxDB, Point } from '@influxdata/influxdb-client';
-import { Data } from './main.js';
 import Config from './config.js';
 import Secrets from './secrets.js';
+
+export type Data = {
+    title: string
+    prices: { quantity: number; price: number }[];
+    sku: string;
+    pcsPalette: number;
+    url: string;
+}
 
 export class TimeSerie {
     static async save(

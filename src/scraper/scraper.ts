@@ -1,12 +1,6 @@
 import { PlaywrightCrawler } from "crawlee";
 
-export type Data = {
-    title: string
-    prices: { quantity: number; price: number }[];
-    sku: string;
-    pcsPalette: number;
-    url: string;
-}
+
 
 interface IScraper {
     crawler: PlaywrightCrawler;
@@ -17,7 +11,7 @@ export class Scraper implements IScraper {
     protected async getLinks() {return [""]}
     crawler = new PlaywrightCrawler();
     async scrape(
-      urls = undefined,
+      urls = [''],
       top10 = false
       ): Promise<void> {
         

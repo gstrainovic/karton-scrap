@@ -1,6 +1,6 @@
 import { PlaywrightCrawler } from 'crawlee';
-import { TimeSerie } from '../save-time-serie.js';
-import { Data, Scraper } from './scraper.js';
+import { Data, TimeSerie } from '../save-time-serie.js';
+import { Scraper } from './scraper.js';
 
 export default class KartonEuScraper extends Scraper {
   override crawler = new PlaywrightCrawler({
