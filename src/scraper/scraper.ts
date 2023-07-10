@@ -11,7 +11,7 @@ export class Scraper implements IScraper {
     protected async getLinks() {return [""]}
     crawler = new PlaywrightCrawler();
     async scrape(
-      urls = [''],
+      urls : string[] | undefined = undefined,
       top10 = false
       ): Promise<void> {
         
